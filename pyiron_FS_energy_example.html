@@ -1,0 +1,2534 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>A pyiron workflow to calculate a free surface energy using multiple potentials, and compare to literature DFT data. &#8212; pyiron_free_surface_energies</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" href="_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'pyiron_FS_energy_example';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="pyiron LAMMPS job" href="README.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="README.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo_dark.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="_static/logo_dark.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="README.html">
+                    pyiron LAMMPS job
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">A pyiron workflow to calculate a free surface energy using multiple potentials, and compare to literature DFT data.</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/materialdigital/pyiron_free_surface_energies/master?urlpath=lab/tree/pyiron_FS_energy_example.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch onBinder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/pyiron_FS_energy_example.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>A pyiron workflow to calculate a free surface energy using multiple potentials, and compare to literature DFT data.</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="a-pyiron-workflow-to-calculate-a-free-surface-energy-using-multiple-potentials-and-compare-to-literature-dft-data">
+<h1>A pyiron workflow to calculate a free surface energy using multiple potentials, and compare to literature DFT data.<a class="headerlink" href="#a-pyiron-workflow-to-calculate-a-free-surface-energy-using-multiple-potentials-and-compare-to-literature-dft-data" title="Permalink to this heading">#</a></h1>
+<p>This notebook <strong>doesn’t</strong> work out of the box if you haven’t configured LAMMPS for pyiron</p>
+<p>conda install -c conda-forge lammps</p>
+<p>OR</p>
+<p>mamba install -c conda-forge lammps</p>
+<p>In the python environment in which you are running pyiron</p>
+<p>WARNING: In practice/production you should configure a compiled LAMMPS executable that is optimised for your cluster!</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyiron.project</span> <span class="kn">import</span> <span class="n">Project</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">ase.lattice.cubic</span> <span class="kn">import</span> <span class="n">BodyCenteredCubic</span> <span class="k">as</span> <span class="n">bcc</span>
+<span class="kn">from</span> <span class="nn">ase.build</span> <span class="kn">import</span> <span class="n">stack</span>
+
+<span class="kn">from</span> <span class="nn">pymatgen.io.ase</span> <span class="kn">import</span> <span class="n">AseAtomsAdaptor</span>
+<span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="kn">import</span> <span class="n">Structure</span>
+
+<span class="kn">from</span> <span class="nn">pyiron.atomistics.structure.atoms</span> <span class="kn">import</span> <span class="n">ase_to_pyiron</span><span class="p">,</span> <span class="n">pymatgen_to_pyiron</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3a463f4d732b423d8801932b452c4d81", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pr</span> <span class="o">=</span> <span class="n">Project</span><span class="p">(</span><span class="s2">&quot;FS_calcs&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Create the structure that we’re going to use:
+a <span class="math notranslate nohighlight">\((111)\)</span> Fe free surface (slab)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">add_vacuum</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">vacuum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds padding to a slab or 2D material.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        structure (Structure): Structure to add vacuum to</span>
+<span class="sd">        vacuum (float): Vacuum thickness to add in Angstroms</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Structure object with vacuum added.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">struct</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">struct</span><span class="o">.</span><span class="n">sites</span><span class="p">]</span>
+    <span class="n">species</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">specie</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">struct</span><span class="o">.</span><span class="n">sites</span><span class="p">]</span>
+    <span class="n">lattice</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">matrix</span>
+    <span class="n">lattice</span><span class="o">.</span><span class="n">setflags</span><span class="p">(</span><span class="n">write</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">lattice_C</span> <span class="o">=</span> <span class="n">lattice</span>
+    <span class="n">lattice_C</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">vacuum</span>
+    <span class="n">struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">(</span><span class="n">lattice_C</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">coords_are_cartesian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">struct</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">surface1</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">rotation_axis</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">element</span> <span class="o">=</span> <span class="s2">&quot;Fe&quot;</span>
+<span class="n">lc</span> <span class="o">=</span> <span class="mf">2.8318488966083</span>
+<span class="n">GB_name</span> <span class="o">=</span> <span class="s2">&quot;S3-RA110-S1-11&quot;</span>
+
+<span class="c1"># The minimum required length of the cell.</span>
+<span class="n">req_length</span> <span class="o">=</span> <span class="mi">15</span>
+
+<span class="n">v1</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">rotation_axis</span><span class="p">,</span><span class="n">surface1</span><span class="p">))</span>
+
+<span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">while</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="n">req_length</span><span class="p">:</span>
+    <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="n">slab1</span> <span class="o">=</span> <span class="n">bcc</span><span class="p">(</span><span class="n">symbol</span><span class="o">=</span><span class="n">element</span><span class="p">,</span> <span class="n">latticeconstant</span><span class="o">=</span><span class="n">lc</span><span class="p">,</span><span class="n">directions</span><span class="o">=</span><span class="p">[</span><span class="n">rotation_axis</span><span class="p">,</span><span class="n">v1</span><span class="p">,</span><span class="n">surface1</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="p">])</span>
+
+    <span class="n">slab</span> <span class="o">=</span> <span class="n">stack</span><span class="p">(</span><span class="n">slab1</span><span class="p">,</span> <span class="n">slab1</span><span class="p">)</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">slab</span><span class="o">.</span><span class="n">cell</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">slab</span><span class="o">.</span><span class="n">rattle</span><span class="p">()</span>
+    
+    <span class="n">pmg_slab</span> <span class="o">=</span> <span class="n">AseAtomsAdaptor</span><span class="p">()</span><span class="o">.</span><span class="n">get_structure</span><span class="p">(</span><span class="n">slab</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+    
+    <span class="n">pmg_slab_vac</span> <span class="o">=</span> <span class="n">pmg_slab</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">pmg_slab_vac</span> <span class="o">=</span> <span class="n">add_vacuum</span><span class="p">(</span><span class="n">pmg_slab_vac</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Create the pyiron job, assign the structure to the job.</p>
+<p>We need to see the potentials, pyiron has an inbuilt potential database</p>
+<p>It automatically finds the applicable potentials given the structure provided.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">job</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">create_job</span><span class="p">(</span><span class="n">job_type</span><span class="o">=</span><span class="n">pr</span><span class="o">.</span><span class="n">job_type</span><span class="o">.</span><span class="n">Lammps</span><span class="p">,</span> <span class="n">job_name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<span class="n">job</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">pymatgen_to_pyiron</span><span class="p">(</span><span class="n">pmg_slab</span><span class="p">)</span>
+<span class="n">job</span><span class="o">.</span><span class="n">list_potentials</span><span class="p">()[:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;1997--Ackland-G-J--Fe--LAMMPS--ipr1&#39;,
+ &#39;1998--Meyer-R--Fe--LAMMPS--ipr1&#39;,
+ &#39;2001--Lee-B-J--Fe--LAMMPS--ipr1&#39;,
+ &#39;2001--Lee-B-J--Fe-Cr--LAMMPS--ipr1&#39;,
+ &#39;2003--Mendelev-M-I--Fe-2--LAMMPS--ipr3&#39;,
+ &#39;2003--Mendelev-M-I--Fe-5--LAMMPS--ipr1&#39;,
+ &#39;2004--Ackland-G-J--Fe-P--LAMMPS--ipr1&#39;,
+ &#39;2004--Zhou-X-W--Fe--LAMMPS--ipr2&#39;,
+ &#39;2005--Lee-B-J--Fe-Cu--LAMMPS--ipr1&#39;,
+ &#39;2005--Mendelev-M-I--Al-Fe--LAMMPS--ipr1&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">potentials_tested</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">list_potentials</span><span class="p">()</span>
+<span class="n">FS_energy_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">potential</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">potentials_tested</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">job_bulk_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;bulk_slab_111_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">job_bulk</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">create_job</span><span class="p">(</span><span class="n">job_type</span><span class="o">=</span><span class="n">pr</span><span class="o">.</span><span class="n">job_type</span><span class="o">.</span><span class="n">Lammps</span><span class="p">,</span> <span class="n">job_name</span><span class="o">=</span><span class="n">job_bulk_name</span><span class="p">)</span>
+        <span class="n">job_bulk</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">pymatgen_to_pyiron</span><span class="p">(</span><span class="n">pmg_slab</span><span class="p">)</span>
+        <span class="n">job_bulk</span><span class="o">.</span><span class="n">potential</span> <span class="o">=</span> <span class="n">potential</span>
+        <span class="n">job_bulk</span><span class="o">.</span><span class="n">calc_minimize</span><span class="p">(</span><span class="n">pressure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                            <span class="n">max_iter</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
+        <span class="n">job_bulk</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">delete_existing_job</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="n">job_SLAB_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;FS_slab_111_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">job_SLAB</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">create_job</span><span class="p">(</span><span class="n">job_type</span><span class="o">=</span><span class="n">pr</span><span class="o">.</span><span class="n">job_type</span><span class="o">.</span><span class="n">Lammps</span><span class="p">,</span> <span class="n">job_name</span><span class="o">=</span><span class="n">job_SLAB_name</span><span class="p">)</span>
+        <span class="n">job_SLAB</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">pymatgen_to_pyiron</span><span class="p">(</span><span class="n">pmg_slab_vac</span><span class="p">)</span>
+        <span class="n">job_SLAB</span><span class="o">.</span><span class="n">potential</span> <span class="o">=</span> <span class="n">potential</span>
+        <span class="n">job_SLAB</span><span class="o">.</span><span class="n">calc_minimize</span><span class="p">(</span><span class="n">pressure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                            <span class="n">max_iter</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
+        <span class="n">job_SLAB</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">delete_existing_job</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="c1"># Formula for GB energy is E_GB_tot - E_SLAB_tot / 2 * (Interface area)</span>
+        <span class="c1"># The 2 in the denominator is to account for the second interface present in the cell due to the periodic conditions</span>
+        
+        <span class="n">FS_energy</span> <span class="o">=</span> <span class="p">(</span><span class="n">job_bulk</span><span class="p">[</span><span class="s1">&#39;output/generic/energy_tot&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">job_SLAB</span><span class="p">[</span><span class="s1">&#39;output/generic/energy_tot&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> \
+                    <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">job_SLAB</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">volume</span> <span class="o">/</span> <span class="n">job_SLAB</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">cell</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="mf">16.02</span>
+        
+        <span class="n">FS_energy_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FS_energy</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">FS_energy_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:23:47,719 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_0
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_0 was saved and received the ID: 765
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:23:48,408 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_0
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_0 was saved and received the ID: 766
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:23:48,993 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_1
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_1 was saved and received the ID: 768
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:23:49,700 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_1
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_1 was saved and received the ID: 770
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:23:50,438 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_2
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_2 was saved and received the ID: 771
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:23:51,868 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_2
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_2 was saved and received the ID: 775
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:23:52,403 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_3
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_3 was saved and received the ID: 777
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:23:53,565 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_3
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_3 was saved and received the ID: 780
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:23:54,084 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_4
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_4 was saved and received the ID: 781
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:23:54,794 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_4
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_4 was saved and received the ID: 783
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:23:55,576 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_5
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_5 was saved and received the ID: 786
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:23:56,292 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_5
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_5 was saved and received the ID: 788
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:23:57,001 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_6
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_6 was saved and received the ID: 790
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:23:58,061 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_6
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_6 was saved and received the ID: 793
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:23:59,186 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_7
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_7 was saved and received the ID: 796
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:23:59,674 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_7
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_7 was saved and received the ID: 798
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:00,232 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_8
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_8 was saved and received the ID: 800
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:01,237 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_8
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_8 was saved and received the ID: 802
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:01,735 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_9
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_9 was saved and received the ID: 803
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:02,569 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_9
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_9 was saved and received the ID: 805
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:03,384 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_10
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_10 was saved and received the ID: 807
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:03,918 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_10
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_10 was saved and received the ID: 808
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:04,376 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_11
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_11 was saved and received the ID: 809
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:05,391 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_11
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_11 was saved and received the ID: 812
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:06,004 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_12
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_12 was saved and received the ID: 814
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:07,645 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_12
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_12 was saved and received the ID: 818
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:08,099 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_13
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_13 was saved and received the ID: 819
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:09,701 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_13
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_13 was saved and received the ID: 823
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:10,267 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_14
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_14 was saved and received the ID: 825
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:12,105 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_14
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_14 was saved and received the ID: 830
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:12,799 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_15
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_15 was saved and received the ID: 832
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:13,705 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_15
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_15 was saved and received the ID: 834
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:14,636 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_16
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_16 was saved and received the ID: 837
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:16,145 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_16
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_16 was saved and received the ID: 841
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:17,399 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_17
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_17 was saved and received the ID: 843
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:18,395 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_17
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_17 was saved and received the ID: 844
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:18,891 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_18
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_18 was saved and received the ID: 845
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:22,361 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_18
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_18 was saved and received the ID: 851
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:22,908 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_19
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_19 was saved and received the ID: 853
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:23,614 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_19
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_19 was saved and received the ID: 855
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:24,469 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_20
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_20 was saved and received the ID: 857
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:25,191 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_20
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_20 was saved and received the ID: 859
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:25,835 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_21
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_21 was saved and received the ID: 861
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:26,605 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_21
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_21 was saved and received the ID: 863
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:27,202 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_22
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_22 was saved and received the ID: 865
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:28,730 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_22
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_22 was saved and received the ID: 867
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:29,157 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_23
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_23 was saved and received the ID: 868
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:29,724 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_23
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_23 was saved and received the ID: 870
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:30,199 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_24
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_24 was saved and received the ID: 871
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:30,710 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_24
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_24 was saved and received the ID: 872
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:31,157 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_25
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_25 was saved and received the ID: 874
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:33,209 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_25
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_25 was saved and received the ID: 876
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:33,835 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_26
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_26 was saved and received the ID: 878
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:34,754 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_26
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_26 was saved and received the ID: 879
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:35,268 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_27
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_27 was saved and received the ID: 880
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:36,844 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_27
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_27 was saved and received the ID: 883
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:38,631 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_28
+2023-08-11 18:24:38,931 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:24:38,932 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.001 seconds
+ERROR on proc 0: Not a valid floating-point number: &#39;Infinity&#39; (src/MANYBODY/pair_eam_alloy.cpp:174)
+Last command: pair_coeff * * eam/alloy FeCr_d.eam.alloy Fe Cr
+
+2023-08-11 18:24:38,947 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_29
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_28 was saved and received the ID: 887
+The job bulk_slab_111_29 was saved and received the ID: 889
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:40,393 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_29
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_29 was saved and received the ID: 893
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:41,685 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_30
+2023-08-11 18:24:41,848 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:24:41,849 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR on proc 0: Not a valid floating-point number: &#39;INF&#39; (src/MANYBODY/pair_eam_alloy.cpp:174)
+Last command: pair_coeff * * FeNiCr.eam.alloy Fe Ni Cr
+
+2023-08-11 18:24:41,861 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_31
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_30 was saved and received the ID: 895
+The job bulk_slab_111_31 was saved and received the ID: 896
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:42,575 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_31
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_31 was saved and received the ID: 898
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:43,386 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_32
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_32 was saved and received the ID: 900
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:43,982 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_32
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_32 was saved and received the ID: 902
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:44,652 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_33
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_33 was saved and received the ID: 905
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:45,456 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_33
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_33 was saved and received the ID: 907
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:24:46,050 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_34
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_34 was saved and received the ID: 909
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:01,591 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_34
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_34 was saved and received the ID: 938
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:02,120 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_35
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_35 was saved and received the ID: 940
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:04,082 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_35
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_35 was saved and received the ID: 944
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:05,795 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_36
+2023-08-11 18:25:05,992 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:25:05,993 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.001 seconds
+ERROR on proc 0: Not a valid floating-point number: &#39;Infinity&#39; (src/MANYBODY/pair_eam_alloy.cpp:174)
+Last command: pair_coeff * * eam/alloy FeCrW_d.eam.alloy Fe Cr W
+
+2023-08-11 18:25:06,008 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_37
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_36 was saved and received the ID: 946
+The job bulk_slab_111_37 was saved and received the ID: 947
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:08,325 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_37
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_37 was saved and received the ID: 953
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:10,725 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_38
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_38 was saved and received the ID: 964
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:11,624 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_38
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_38 was saved and received the ID: 968
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:12,496 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_39
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_39 was saved and received the ID: 972
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:13,188 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_39
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_39 was saved and received the ID: 976
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:13,898 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_40
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_40 was saved and received the ID: 980
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:14,514 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_40
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_40 was saved and received the ID: 982
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:15,138 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_41
+2023-08-11 18:25:15,447 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:25:15,448 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR on proc 0: Not a valid integer number: &#39;0.000000&#39; (src/MEAM/pair_meam.cpp:466)
+Last command: pair_coeff * * Fe3C_library_Liyanage_2014.meam Fe C Fe3C_Liyanage_2014.meam Fe C
+
+2023-08-11 18:25:15,461 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_42
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_41 was saved and received the ID: 985
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:15,783 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:25:15,784 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR on proc 0: Not a valid integer number: &#39;-5.000000&#39; (src/MEAM/pair_meam.cpp:466)
+Last command: pair_coeff * * library.Fe.meam Fe Fe.meam Fe
+
+2023-08-11 18:25:15,825 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_43
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_42 was saved and received the ID: 987
+The job bulk_slab_111_43 was saved and received the ID: 990
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:17,535 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_43
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_43 was saved and received the ID: 996
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:19,224 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_44
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_44 was saved and received the ID: 1004
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:20,086 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_44
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_44 was saved and received the ID: 1009
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:21,155 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_45
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_45 was saved and received the ID: 1013
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:22,589 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_45
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_45 was saved and received the ID: 1019
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:23,290 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_46
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_46 was saved and received the ID: 1022
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:24,526 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_46
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_46 was saved and received the ID: 1027
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:25,215 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_47
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_47 was saved and received the ID: 1030
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:26,330 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_47
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_47 was saved and received the ID: 1031
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:26,852 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_48
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_48 was saved and received the ID: 1032
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:40,504 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_48
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_48 was saved and received the ID: 1033
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:40,946 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_49
+2023-08-11 18:25:41,124 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:25:41,125 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR on proc 0: Not a valid integer number: &#39;-5.000000&#39; (src/MEAM/pair_meam.cpp:466)
+Last command: pair_coeff * * library.Fe.meam Fe Fe.meam Fe
+
+2023-08-11 18:25:41,136 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_50
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_49 was saved and received the ID: 1034
+The job bulk_slab_111_50 was saved and received the ID: 1035
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:41,674 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_50
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_50 was saved and received the ID: 1036
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:42,195 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_51
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_51 was saved and received the ID: 1037
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:55,488 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_51
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_51 was saved and received the ID: 1038
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:55,942 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_52
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_52 was saved and received the ID: 1039
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:56,523 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_52
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_52 was saved and received the ID: 1040
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:57,095 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_53
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_53 was saved and received the ID: 1041
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:57,737 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_53
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_53 was saved and received the ID: 1042
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:25:58,416 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_54
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_54 was saved and received the ID: 1043
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:11,099 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_54
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_54 was saved and received the ID: 1044
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:11,671 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_55
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_55 was saved and received the ID: 1045
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:12,086 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_55
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_55 was saved and received the ID: 1046
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:12,474 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_56
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_56 was saved and received the ID: 1047
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:13,282 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_56
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_56 was saved and received the ID: 1048
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:14,044 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_57
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_57 was saved and received the ID: 1049
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:14,389 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_57
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_57 was saved and received the ID: 1050
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:14,802 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_58
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_58 was saved and received the ID: 1051
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:15,357 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_58
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_58 was saved and received the ID: 1052
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:15,850 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_59
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_59 was saved and received the ID: 1053
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:17,013 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_59
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_59 was saved and received the ID: 1054
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:18,210 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_60
+2023-08-11 18:26:18,384 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_61
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_61 was saved and received the ID: 1056
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:18,926 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_61
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_61 was saved and received the ID: 1057
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:19,405 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_62
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_62 was saved and received the ID: 1058
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:20,161 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_62
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_62 was saved and received the ID: 1059
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:20,785 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_63
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_63 was saved and received the ID: 1060
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:21,447 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_63
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_63 was saved and received the ID: 1061
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:21,933 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_64
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_64 was saved and received the ID: 1062
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:22,710 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_64
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_64 was saved and received the ID: 1063
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:23,472 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_65
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_65 was saved and received the ID: 1064
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:24,086 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_65
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_65 was saved and received the ID: 1065
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:24,525 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_66
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_66 was saved and received the ID: 1066
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:25,006 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_66
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_66 was saved and received the ID: 1067
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:25,438 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_67
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_67 was saved and received the ID: 1068
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:25,975 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! FS_slab_111_67
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job FS_slab_111_67 was saved and received the ID: 1069
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:26,477 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_68
+2023-08-11 18:26:26,629 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:26,631 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.001 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_AcklandBaconCalder_1997_Fe__MO_142799717516_005
+
+2023-08-11 18:26:26,644 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_69
+2023-08-11 18:26:26,792 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:26,793 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_AcklandMendelevSrolovitz_2004_FeP__MO_884343146310_005
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_68 was saved and received the ID: 1070
+The job bulk_slab_111_69 was saved and received the ID: 1071
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:26,806 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_70
+2023-08-11 18:26:26,962 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:26,963 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_BonnyCastinBullens_2013_FeW__MO_737567242631_000
+
+2023-08-11 18:26:26,978 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_71
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_70 was saved and received the ID: 1072
+The job bulk_slab_111_71 was saved and received the ID: 1073
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:27,138 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:27,140 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_BonnyCastinTerentyev_2013_FeNiCr__MO_763197941039_000
+
+2023-08-11 18:26:27,151 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_72
+2023-08-11 18:26:27,310 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:27,311 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.001 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_BonnyPasianotCastin_2009_FeCuNi__MO_469343973171_005
+
+2023-08-11 18:26:27,324 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_73
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_72 was saved and received the ID: 1074
+The job bulk_slab_111_73 was saved and received the ID: 1075
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:27,483 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:27,484 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_BonnyPasianotMalerba_2009_FeNi__MO_267721408934_005
+
+2023-08-11 18:26:27,496 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_74
+2023-08-11 18:26:27,667 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:27,669 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_ChamatiPapanicolaouMishin_2006_Fe__MO_960699513424_000
+
+2023-08-11 18:26:27,681 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_75
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_74 was saved and received the ID: 1076
+The job bulk_slab_111_75 was saved and received the ID: 1077
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:27,851 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:27,852 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_HepburnAckland_2008_FeC__MO_143977152728_005
+
+2023-08-11 18:26:27,863 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_76
+2023-08-11 18:26:28,021 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:28,022 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_Marinica_2007_Fe__MO_466808877130_000
+
+2023-08-11 18:26:28,034 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_77
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_76 was saved and received the ID: 1078
+The job bulk_slab_111_77 was saved and received the ID: 1079
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:28,205 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:28,207 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_Marinica_2011_Fe__MO_255315407910_000
+
+2023-08-11 18:26:28,218 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_78
+2023-08-11 18:26:28,390 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:28,391 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_MendelevBorovikov_2020_FeNiCr__MO_922363340570_000
+
+2023-08-11 18:26:28,403 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_79
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_78 was saved and received the ID: 1080
+The job bulk_slab_111_79 was saved and received the ID: 1081
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:28,564 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:28,565 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_MendelevHanSon_2007_VFe__MO_249706810527_005
+
+2023-08-11 18:26:28,576 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_80
+2023-08-11 18:26:28,758 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:28,759 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_MendelevHanSrolovitz_2003Potential2_Fe__MO_769582363439_005
+
+2023-08-11 18:26:28,770 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_81
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_80 was saved and received the ID: 1082
+The job bulk_slab_111_81 was saved and received the ID: 1083
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:28,932 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:28,933 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_MendelevHanSrolovitz_2003Potential5_Fe__MO_942420706858_005
+
+2023-08-11 18:26:28,946 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_82
+2023-08-11 18:26:29,111 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:29,111 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.001 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_MendelevHanSrolovitz_2003_Fe__MO_807997826449_000
+
+2023-08-11 18:26:29,124 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_83
+2023-08-11 18:26:29,278 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:29,279 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_MendelevSrolovitzAckland_2005_AlFe__MO_577453891941_005
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_82 was saved and received the ID: 1084
+The job bulk_slab_111_83 was saved and received the ID: 1085
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:29,289 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_84
+2023-08-11 18:26:29,452 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:29,453 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_Mendelev_2003_Fe__MO_546673549085_000
+
+2023-08-11 18:26:29,464 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_85
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_84 was saved and received the ID: 1086
+The job bulk_slab_111_85 was saved and received the ID: 1087
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:29,624 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:29,625 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_ZhouJohnsonWadley_2004NISTretabulation_Fe__MO_681088298208_000
+
+2023-08-11 18:26:29,638 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_86
+2023-08-11 18:26:29,815 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:29,815 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Dynamo_ZhouJohnsonWadley_2004_Fe__MO_650279905230_005
+
+2023-08-11 18:26:29,828 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_87
+2023-08-11 18:26:29,979 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:29,980 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_Magnetic2GQuintic_ChiesaDerletDudarev_2011_Fe__MO_140444321607_002
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_86 was saved and received the ID: 1088
+The job bulk_slab_111_87 was saved and received the ID: 1089
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:29,992 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_88
+2023-08-11 18:26:30,499 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:30,500 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_MagneticCubic_DudarevDerlet_2005_Fe__MO_135034229282_002
+
+2023-08-11 18:26:30,512 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_89
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_88 was saved and received the ID: 1090
+The job bulk_slab_111_89 was saved and received the ID: 1091
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:30,690 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:30,691 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim EAM_MagneticCubic_MendelevHanSrolovitz_2003_Fe__MO_856295952425_002
+
+2023-08-11 18:26:30,703 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_90
+2023-08-11 18:26:30,879 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:30,880 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_AsadiZaeemNouranian_2015_Fe__MO_492310898779_000
+
+2023-08-11 18:26:30,890 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_91
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_90 was saved and received the ID: 1092
+The job bulk_slab_111_91 was saved and received the ID: 1093
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:31,052 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:31,053 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_ChoiJoSohn_2018_CoNiCrFeMn__MO_115454747503_000
+
+2023-08-11 18:26:31,063 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_92
+2023-08-11 18:26:31,233 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:31,234 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_ChoiKimSeol_2017_CoFe__MO_179158257180_000
+
+2023-08-11 18:26:31,245 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_93
+2023-08-11 18:26:31,405 - pyiron_log - WARNING - Job aborted
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_92 was saved and received the ID: 1094
+The job bulk_slab_111_93 was saved and received the ID: 1095
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:31,406 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_EtesamiAsadi_2018_Fe__MO_549900287421_000
+
+2023-08-11 18:26:31,417 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_94
+2023-08-11 18:26:31,574 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:31,575 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_JelinekGrohHorstemeyer_2012_AlSiMgCuFe__MO_262519520678_000
+
+2023-08-11 18:26:31,586 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_95
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_94 was saved and received the ID: 1096
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:31,781 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:31,782 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_JeongParkDo_2018_PdFe__MO_924736622203_000
+
+2023-08-11 18:26:31,795 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_96
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_95 was saved and received the ID: 1097
+The job bulk_slab_111_96 was saved and received the ID: 1098
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:31,962 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:31,964 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_KimJungLee_2009_FeTiC__MO_110119204723_000
+
+2023-08-11 18:26:31,974 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_97
+2023-08-11 18:26:32,131 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:32,132 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.001 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_KimJungLee_2010_FeNbC__MO_072689718616_000
+
+2023-08-11 18:26:32,145 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_98
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_97 was saved and received the ID: 1099
+The job bulk_slab_111_98 was saved and received the ID: 1100
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:32,334 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:32,334 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_KimLee_2006_PtFe__MO_343168101490_000
+
+2023-08-11 18:26:32,346 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_99
+2023-08-11 18:26:32,541 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:32,542 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.001 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_KimShinLee_2009_FeMn__MO_058735400462_000
+
+2023-08-11 18:26:32,554 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_100
+2023-08-11 18:26:32,705 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:32,706 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_KoJimLee_2012_FeP__MO_179420363944_000
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_99 was saved and received the ID: 1101
+The job bulk_slab_111_100 was saved and received the ID: 1102
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:32,719 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_101
+2023-08-11 18:26:32,890 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:32,891 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_LeeJang_2007_FeH__MO_095610951957_000
+
+2023-08-11 18:26:32,903 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_102
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_101 was saved and received the ID: 1103
+The job bulk_slab_111_102 was saved and received the ID: 1104
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:33,058 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:33,059 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_LeeLeeKim_2006_FeN__MO_432861766738_000
+
+2023-08-11 18:26:33,072 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_103
+2023-08-11 18:26:33,266 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:33,267 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_LeeLee_2010_FeAl__MO_332211522050_000
+
+2023-08-11 18:26:33,281 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_104
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_103 was saved and received the ID: 1105
+The job bulk_slab_111_104 was saved and received the ID: 1106
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:33,448 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:33,450 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_LeeWirthShim_2005_FeCu__MO_063626065437_000
+
+2023-08-11 18:26:33,461 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_105
+2023-08-11 18:26:33,617 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:33,617 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_Lee_2006_FeC__MO_856956178669_000
+
+2023-08-11 18:26:33,629 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_106
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_105 was saved and received the ID: 1107
+The job bulk_slab_111_106 was saved and received the ID: 1108
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:33,813 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:33,814 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_LiyanageKimHouze_2014_FeC__MO_075279800195_000
+
+2023-08-11 18:26:33,826 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_107
+2023-08-11 18:26:33,985 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:33,986 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_SaLee_2008_FeTi__MO_260546967793_000
+
+2023-08-11 18:26:33,997 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_108
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_107 was saved and received the ID: 1109
+The job bulk_slab_111_108 was saved and received the ID: 1110
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:34,164 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:34,166 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_SaLee_2008_NbFe__MO_162036141261_000
+
+2023-08-11 18:26:34,178 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_109
+2023-08-11 18:26:34,365 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:34,366 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_WuLeeSu_2017_NiCrFe__MO_912636107108_000
+
+2023-08-11 18:26:34,377 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_110
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_109 was saved and received the ID: 1111
+The job bulk_slab_111_110 was saved and received the ID: 1112
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:34,532 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:34,533 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MEAM_LAMMPS_WuLeeSu_2017_NiFe__MO_321233176498_000
+
+2023-08-11 18:26:34,546 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_111
+2023-08-11 18:26:34,714 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:34,715 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.001 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim MJ_MorrisAgaLevashov_2008_Fe__MO_857282754307_003
+
+2023-08-11 18:26:34,727 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_112
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_111 was saved and received the ID: 1113
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:34,921 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:34,922 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim Morse_Shifted_GirifalcoWeizer_1959HighCutoff_Fe__MO_147603128437_004
+
+2023-08-11 18:26:34,934 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_113
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_112 was saved and received the ID: 1114
+The job bulk_slab_111_113 was saved and received the ID: 1115
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:35,093 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:35,094 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.001 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim Morse_Shifted_GirifalcoWeizer_1959LowCutoff_Fe__MO_331285495617_004
+
+2023-08-11 18:26:35,107 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_114
+2023-08-11 18:26:35,284 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:35,285 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim Morse_Shifted_GirifalcoWeizer_1959MedCutoff_Fe__MO_984358344196_004
+
+2023-08-11 18:26:35,299 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_115
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_114 was saved and received the ID: 1116
+The job bulk_slab_111_115 was saved and received the ID: 1117
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:35,461 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:35,463 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim Tersoff_LAMMPS_MuellerErhartAlbe_2007_Fe__MO_137964310702_003
+
+2023-08-11 18:26:35,477 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_116
+2023-08-11 18:26:35,645 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:35,645 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim Sim_LAMMPS_EAMCD_StukowskiSadighErhart_2009_FeCr__SM_775564499513_000
+
+2023-08-11 18:26:35,657 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_117
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_116 was saved and received the ID: 1118
+The job bulk_slab_111_117 was saved and received the ID: 1119
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:35,841 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:35,842 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim Sim_LAMMPS_EAM_BonnyCastinBullens_2013_FeCrW__SM_699257350704_000
+
+2023-08-11 18:26:35,854 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_118
+2023-08-11 18:26:36,025 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:36,026 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim Sim_LAMMPS_EAM_BonnyPasianotTerentyev_2011_FeCr__SM_237089298463_000
+
+2023-08-11 18:26:36,038 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_119
+2023-08-11 18:26:36,191 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:36,192 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim Sim_LAMMPS_MEAM_AsadiZaeemNouranian_2015_Fe__SM_042630680993_000
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_118 was saved and received the ID: 1120
+The job bulk_slab_111_119 was saved and received the ID: 1121
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:36,204 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_120
+2023-08-11 18:26:36,359 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:36,360 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim Sim_LAMMPS_MEAM_EtesamiAsadi_2018_Fe__SM_267016608755_000
+
+2023-08-11 18:26:36,372 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_121
+2023-08-11 18:26:36,524 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:36,525 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim Sim_LAMMPS_MEAM_JelinekGrohHorstemeyer_2012_AlSiMgCuFe__SM_656517352485_000
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_120 was saved and received the ID: 1122
+The job bulk_slab_111_121 was saved and received the ID: 1123
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:36,538 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_122
+2023-08-11 18:26:36,703 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:36,704 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim Sim_LAMMPS_MEAM_KimJungLee_2009_FeTiC__SM_531038274471_000
+
+2023-08-11 18:26:36,717 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_123
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_122 was saved and received the ID: 1124
+The job bulk_slab_111_123 was saved and received the ID: 1125
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:36,893 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:36,895 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim Sim_LAMMPS_MEAM_LiyanageKimHouze_2014_FeC__SM_652425777808_000
+
+2023-08-11 18:26:36,906 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_124
+2023-08-11 18:26:37,075 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:37,076 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim Sim_LAMMPS_ReaxFF_AryanpourVanDuinKubicki_2010_FeHO__SM_222964216001_001
+
+2023-08-11 18:26:37,088 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_125
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_124 was saved and received the ID: 1126
+The job bulk_slab_111_125 was saved and received the ID: 1127
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-08-11 18:26:37,262 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:37,263 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim Sim_LAMMPS_TersoffZBL_ByggmastarGranberg_2020_Fe__SM_958863895234_000
+
+2023-08-11 18:26:37,279 - pyiron_log - WARNING - No HDF5 file found - remove database entry and create new job! bulk_slab_111_126
+2023-08-11 18:26:37,454 - pyiron_log - WARNING - Job aborted
+2023-08-11 18:26:37,455 - pyiron_log - WARNING - LAMMPS (28 Mar 2023 - Update 1)
+Reading data file ...
+  orthogonal box = (0 0 0) to (4.0048391 6.9365848 34.619625)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  48 atoms
+  read_data CPU = 0.000 seconds
+ERROR: KIM ModelCreate failed (src/KIM/pair_kim.cpp:828)
+Last command: pair_style kim Sim_LAMMPS_TersoffZBL_HenrikssonBjorkasNordlund_2013_FeC__SM_473463498269_000
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The job bulk_slab_111_126 was saved and received the ID: 1128
+</pre></div>
+</div>
+</div>
+</div>
+<p>Construct a dataframe which contains the information about FS energy, and their errors with respect to a DFT computed value.</p>
+<p>The FS energy of 2.73 J/m^2 is from the value computed in this study:</p>
+<p>Mai, H.L., Cui, X.Y., Scheiber, D., Romaner, L. and Ringer, S.P., 2022. The segregation of transition metals to iron grain boundaries and their effects on cohesion. Acta materialia, 231, p.117902.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;potential&#39;</span><span class="p">:</span> <span class="n">potentials_tested</span><span class="p">,</span> <span class="s1">&#39;FS_energy (J/m^2)&#39;</span><span class="p">:</span> <span class="n">FS_energy_list</span><span class="p">}</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="n">FS_energy_DFT</span> <span class="o">=</span> <span class="mf">2.73</span>
+<span class="n">df</span><span class="p">[</span><span class="s2">&quot;err_DFT (J/m^2)&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">FS_energy_DFT</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;FS_energy (J/m^2)&quot;</span><span class="p">],</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">df</span><span class="p">[</span><span class="s2">&quot;abs_rel_err_DFT (%)&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">FS_energy_DFT</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;FS_energy (J/m^2)&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="n">FS_energy_DFT</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="n">df</span><span class="p">[</span><span class="s2">&quot;FS_energy (J/m^2)&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;FS_energy (J/m^2)&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;abs_rel_err_DFT (%)&quot;</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s2">&quot;FS_energy (J/m^2)&quot;</span><span class="p">)</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>potential</th>
+      <th>FS_energy (J/m^2)</th>
+      <th>err_DFT (J/m^2)</th>
+      <th>abs_rel_err_DFT (%)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>66</th>
+      <td>2022--Starikov-S--Fe-Cr-H--LAMMPS--ipr1</td>
+      <td>2.786</td>
+      <td>-0.056</td>
+      <td>2.0</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>2009--Kim-H-K--Fe-Ti-C--LAMMPS--ipr2</td>
+      <td>2.648</td>
+      <td>0.082</td>
+      <td>3.0</td>
+    </tr>
+    <tr>
+      <th>56</th>
+      <td>2019--Mendelev-M-I--Fe-Ni-Cr--LAMMPS--ipr1</td>
+      <td>2.355</td>
+      <td>0.375</td>
+      <td>14.0</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>2010--Malerba-L--Fe--LAMMPS--ipr1</td>
+      <td>2.337</td>
+      <td>0.393</td>
+      <td>14.0</td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td>2012--Proville-L--Fe--LAMMPS--ipr1</td>
+      <td>3.182</td>
+      <td>-0.452</td>
+      <td>17.0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>0</th>
+      <td>1997--Ackland-G-J--Fe--LAMMPS--ipr1</td>
+      <td>16.566</td>
+      <td>-13.836</td>
+      <td>507.0</td>
+    </tr>
+    <tr>
+      <th>55</th>
+      <td>2019--Byggmastar-J--Fe-O--LAMMPS--ipr1</td>
+      <td>18.084</td>
+      <td>-15.354</td>
+      <td>562.0</td>
+    </tr>
+    <tr>
+      <th>40</th>
+      <td>2013--Henriksson-K-O-E--Fe-C--LAMMPS--ipr1</td>
+      <td>18.084</td>
+      <td>-15.354</td>
+      <td>562.0</td>
+    </tr>
+    <tr>
+      <th>32</th>
+      <td>2011--Chiesa-S--Fe-33--LAMMPS--ipr1</td>
+      <td>18.308</td>
+      <td>-15.578</td>
+      <td>571.0</td>
+    </tr>
+    <tr>
+      <th>57</th>
+      <td>2020--Byggmastar-J--Fe--LAMMPS--ipr1</td>
+      <td>22.905</td>
+      <td>-20.175</td>
+      <td>739.0</td>
+    </tr>
+  </tbody>
+</table>
+<p>61 rows × 4 columns</p>
+</div></div></div>
+</div>
+<p>Order the potentials by the minimum error wrt. DFT!</p>
+<p>Now we have a good idea of how to search for an empirical potential which best captures the FS energetics of a specific surface.</p>
+<p>You can see that there are only a few potentials that are very, very accurate at predicting this specific surface energy.</p>
+<p>For a real study you should consider not just a single surface, but validate it across multiple surfaces and ideally the specific phenomena you want to study.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;abs_rel_err_DFT (%)&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>potential</th>
+      <th>FS_energy (J/m^2)</th>
+      <th>err_DFT (J/m^2)</th>
+      <th>abs_rel_err_DFT (%)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>66</th>
+      <td>2022--Starikov-S--Fe-Cr-H--LAMMPS--ipr1</td>
+      <td>2.786</td>
+      <td>-0.056</td>
+      <td>2.0</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>2009--Kim-H-K--Fe-Ti-C--LAMMPS--ipr2</td>
+      <td>2.648</td>
+      <td>0.082</td>
+      <td>3.0</td>
+    </tr>
+    <tr>
+      <th>56</th>
+      <td>2019--Mendelev-M-I--Fe-Ni-Cr--LAMMPS--ipr1</td>
+      <td>2.355</td>
+      <td>0.375</td>
+      <td>14.0</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>2010--Malerba-L--Fe--LAMMPS--ipr1</td>
+      <td>2.337</td>
+      <td>0.393</td>
+      <td>14.0</td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td>2012--Proville-L--Fe--LAMMPS--ipr1</td>
+      <td>3.182</td>
+      <td>-0.452</td>
+      <td>17.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1998--Meyer-R--Fe--LAMMPS--ipr1</td>
+      <td>2.101</td>
+      <td>0.629</td>
+      <td>23.0</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>2012--Jelinek-B--Al-Si-Mg-Cu-Fe--LAMMPS--ipr2</td>
+      <td>2.075</td>
+      <td>0.655</td>
+      <td>24.0</td>
+    </tr>
+    <tr>
+      <th>59</th>
+      <td>2020--Groger-R--Co-Cr-Fe-Mn-Ni--LAMMPS--ipr1</td>
+      <td>2.026</td>
+      <td>0.704</td>
+      <td>26.0</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>2004--Zhou-X-W--Fe--LAMMPS--ipr2</td>
+      <td>3.639</td>
+      <td>-0.909</td>
+      <td>33.0</td>
+    </tr>
+    <tr>
+      <th>50</th>
+      <td>2018--Farkas-D--Fe-Ni-Cr-Co-Cu--LAMMPS--ipr2</td>
+      <td>1.593</td>
+      <td>1.137</td>
+      <td>42.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="README.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">pyiron LAMMPS job</p>
+      </div>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By pyiron
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2022.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
