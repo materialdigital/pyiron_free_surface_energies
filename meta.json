@@ -9,20 +9,20 @@
     "keywords": [
         "workflow",
         "LAMMPS",
-        "molecular dynamics",
+        "molecular dynamics"
     ],
     "categories":[
-        "category1, atomistics",
+        "category1, atomistics"
     ],
     "steps/codes":[
         "step1, e.g., basic LAMMPS isothermal calculation",
-        "code1, e.g., LAMMPS",
+        "code1, e.g., LAMMPS"
     ],
     "license": {
-        "software1": "GNU Public License Version 2",
+        "software1": "GNU Public License Version 2"
     },
     "publication": [
-        "Janssen, J., Surendralal, S., Lysogorskiy, Y., Todorova, M., Hickel, T., Drautz, R. and Neugebauer, J., 2019. pyiron: An integrated development environment for computational materials science. Computational Materials Science, 163, pp.24-36."
+        "Janssen, J., Surendralal, S., Lysogorskiy, Y., Todorova, M., Hickel, T., Drautz, R. and Neugebauer, J., 2019. pyiron: An integrated development environment for computational materials science. Computational Materials Science, 163, pp.24-36.",
         "Mai, H.L., Cui, X.Y., Scheiber, D., Romaner, L. and Ringer, S.P., 2022. The segregation of transition metals to iron grain boundaries and their effects on cohesion. Acta materialia, 231, p.117902."
     ],
     "logo" : "logo_dark.png"
